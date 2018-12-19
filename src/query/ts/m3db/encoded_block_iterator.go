@@ -38,8 +38,9 @@ type consolidationSettings struct {
 }
 
 type encodedBlock struct {
-	// There is slightly different execution for the last block in the series
+	// There is slightly different execution for the last block in the series.
 	lastBlock            bool
+	lookback             time.Duration
 	meta                 block.Metadata
 	tagOptions           models.TagOptions
 	consolidation        consolidationSettings
@@ -47,13 +48,13 @@ type encodedBlock struct {
 	seriesBlockIterators []encoding.SeriesIterator
 }
 
-// NewEncodedBlock builds an encoded block
+// NewEncodedBlock builds an encoded block.
 func NewEncodedBlock(
 	seriesBlockIterators []encoding.SeriesIterator,
-	bounds models.Bounds,
-	tagOptions models.TagOptions,
+	opts Options,
 	lastBlock bool,
 ) (block.Block, error) {
+	bounds := opts.GetBounds()
 	consolidation := consolidationSettings{
 		consolidationFn: consolidators.TakeLast,
 		currentTime:     bounds.Start,
@@ -62,8 +63,9 @@ func NewEncodedBlock(
 
 	bl := newEncodedBlock(
 		seriesBlockIterators,
-		tagOptions,
+		opts.GetTagOptions(),
 		consolidation,
+		opts.GetLookbackDuration(),
 		lastBlock,
 	)
 	err := bl.generateMetas()
@@ -78,12 +80,14 @@ func newEncodedBlock(
 	seriesBlockIterators []encoding.SeriesIterator,
 	tagOptions models.TagOptions,
 	consolidation consolidationSettings,
+	lookback time.Duration,
 	lastBlock bool,
 ) encodedBlock {
 	return encodedBlock{
 		seriesBlockIterators: seriesBlockIterators,
 		tagOptions:           tagOptions,
 		consolidation:        consolidation,
+		lookback:             lookback,
 		lastBlock:            lastBlock,
 	}
 }
@@ -151,6 +155,7 @@ func (b *encodedBlock) WithMetadata(
 		b.seriesBlockIterators,
 		b.tagOptions,
 		b.consolidation,
+		b.lookback,
 		b.lastBlock,
 	)
 	bl.meta = meta

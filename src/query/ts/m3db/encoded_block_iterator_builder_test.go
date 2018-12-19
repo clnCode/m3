@@ -22,27 +22,36 @@ package m3db
 
 import (
 	"fmt"
-	"math"
+	"math/rand"
 	"testing"
 	"time"
 
 	"github.com/m3db/m3/src/dbnode/encoding"
-	"github.com/m3db/m3/src/query/block"
 	"github.com/m3db/m3/src/query/models"
 	"github.com/m3db/m3/src/query/test"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/m3db/m3/src/query/ts/m3db/consolidators"
 )
 
-var (
-	Start     = time.Now().Truncate(time.Hour)
-	blockSize = time.Minute * 6
-	nan       = math.NaN()
-)
+func buildCustomwhatever(
+	start time.Time,
+	stepSize time.Duration,
+	dps [][]test.Datapoint,
+) (
+	encoding.SeriesIterator,
+	models.Bounds,
+) {
+	i := rand.Int()
+	iter, bounds, _ := test.BuildCustomIterator(
+		dps,
+		map[string]string{"a": "b", "c": fmt.Sprint(i)},
+		fmt.Sprintf("abc%d", i), "namespace",
+		start,
+		blockSize, stepSize,
+	)
+	return iter, bounds
+}
 
-func generateIterators(
-	t *testing.T,
+func genwhatever(
 	stepSize time.Duration,
 ) (
 	encoding.SeriesIterators,
@@ -106,67 +115,27 @@ func generateIterators(
 		start  = Start
 	)
 	for i, dps := range datapoints {
-		iter, bounds = buildCustomIterator(t, i, start, stepSize, dps)
+		iter, bounds = buildCustomwhatever(start, stepSize, dps)
 		iters[i] = iter
 	}
 
 	return encoding.NewSeriesIterators(iters, nil), bounds
 }
 
-func buildCustomIterator(
-	t *testing.T,
-	i int,
-	start time.Time,
-	stepSize time.Duration,
-	dps [][]test.Datapoint,
-) (
-	encoding.SeriesIterator,
-	models.Bounds,
-) {
-	iter, bounds, err := test.BuildCustomIterator(
-		dps,
-		map[string]string{"a": "b", "c": fmt.Sprint(i)},
-		fmt.Sprintf("abc%d", i), "namespace",
-		start,
-		blockSize, stepSize,
-	)
-	require.NoError(t, err)
-	return iter, bounds
-}
+// BenchmarkBuilder-8   	 2000000	       903 ns/op	     512 B/op	       6 allocs/op
+// BenchmarkBuilder-8   	 1000000	      1071 ns/op	     512 B/op	       6 allocs/op
 
-func verifyMetas(
-	t *testing.T,
-	i int,
-	bounds models.Bounds,
-	meta block.Metadata,
-	metas []block.SeriesMeta,
-) {
-	assert.True(t, meta.Bounds.Equals(bounds))
-	require.Equal(t, 1, meta.Tags.Len())
-	val, found := meta.Tags.Get([]byte("a"))
-	assert.True(t, found)
-	assert.Equal(t, []byte("b"), val)
-
-	for i, m := range metas {
-		assert.Equal(t, fmt.Sprintf("abc%d", i), m.Name)
-		require.Equal(t, 1, m.Tags.Len())
-		val, found := m.Tags.Get([]byte("c"))
-		assert.True(t, found)
-		assert.Equal(t, []byte(fmt.Sprint(i)), val)
+//BenchmarkBuilder-8   	   30000	     47662 ns/op	   28311 B/op	     303 allocs/op
+func BenchmarkBuilder(b *testing.B) {
+	tb := newEncodedBlockBuilder(models.NewTagOptions(), consolidators.TakeLast)
+	for i := 0; i < 100; i++ {
+		iters, bounds := genwhatever(time.Minute)
+		for _, iter := range iters.Iters() {
+			tb.add(bounds, iter, true)
+		}
 	}
-}
 
-func generateBlocks(
-	t *testing.T,
-	stepSize time.Duration,
-) ([]block.Block, models.Bounds) {
-	iterators, bounds := generateIterators(t, stepSize)
-	blockOptions := NewOptions().SetBounds(bounds).SetLookbackDuration(time.Minute)
-	blocks, err := ConvertM3DBSeriesIterators(
-		iterators,
-		blockOptions,
-	)
-
-	require.NoError(t, err)
-	return blocks, bounds
+	for i := 0; i < b.N; i++ {
+		tb.build()
+	}
 }
