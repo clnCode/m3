@@ -79,11 +79,6 @@ func (o *encodedBlockOptions) SplittingSeriesByBlock() bool {
 }
 
 func (o *encodedBlockOptions) SetLookbackDuration(lookback time.Duration) Options {
-	// NB: lookback cannot be negative.
-	if lookback < 0 {
-		lookback = 0
-	}
-
 	opts := *o
 	opts.lookbackDuration = lookback
 	return &opts
@@ -144,6 +139,10 @@ func (o *encodedBlockOptions) IteratorPools() encoding.IteratorPools {
 }
 
 func (o *encodedBlockOptions) Validate() error {
+	if o.lookbackDuration < 0 {
+		return errors.New("unable to validate block options; negative lookback")
+	}
+
 	if err := o.tagOptions.Validate(); err != nil {
 		return fmt.Errorf("unable to validate tag options, err: %v", err)
 	}
