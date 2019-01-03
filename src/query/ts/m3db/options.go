@@ -42,6 +42,7 @@ var (
 )
 
 type encodedBlockOptions struct {
+	splitSeries      bool
 	lookbackDuration time.Duration
 	consolidationFn  consolidators.ConsolidationFunc
 	tagOptions       models.TagOptions
@@ -60,6 +61,21 @@ func NewOptions() Options {
 		iterAlloc:        defaultIterAlloc,
 		pools:            pools.BuildIteratorPools(),
 	}
+}
+
+func (o *encodedBlockOptions) SetSplitSeriesByBlock(split bool) Options {
+	opts := *o
+	opts.splitSeries = split
+	return &opts
+}
+
+func (o *encodedBlockOptions) IsSplittingSeriesByBlock() bool {
+	// If any lookback duration has been set, cannot split series by block.
+	if o.lookbackDuration > 0 {
+		return false
+	}
+
+	return o.splitSeries
 }
 
 func (o *encodedBlockOptions) SetLookbackDuration(

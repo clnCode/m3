@@ -79,13 +79,11 @@ func ConvertM3DBSeriesIterators(
 		return nil, err
 	}
 
-	if opts.GetLookbackDuration() > 0 {
-		return seriesIteratorsToEncodedBlockIterators(iterators, opts)
+	if opts.IsSplittingSeriesByBlock() {
+		return convertM3DBSegmentedBlockIterators(iterators, opts)
 	}
 
-	// NB: If the lookback is 0, signifying non-prometheus queries, it is possible
-	// to split a single series iterator by its constituent blocks.
-	return convertM3DBSegmentedBlockIterators(iterators, opts)
+	return seriesIteratorsToEncodedBlockIterators(iterators, opts)
 }
 
 // convertM3DBSegmentedBlockIterators converts series iterators to a list of blocks

@@ -30,6 +30,15 @@ import (
 
 // Options describes the options for encoded block converters.
 type Options interface {
+	// SetSplitSeriesByBlock determines if the converter will split the series
+	// by blocks, or if it will instead treat the entire series as a single block.
+	//
+	// NB: if a lookback duration greater than 0 has been set, the series will
+	// always be treated as a single block.
+	SetSplitSeriesByBlock(bool) Options
+	// IsSplittingSeriesByBlock returns true iff lookback duration is 0, and the
+	// options has not been forced to return a single block.
+	IsSplittingSeriesByBlock() bool
 	// SetLookbackDuration sets the lookback duration.
 	SetLookbackDuration(time.Duration) Options
 	// GetLookbackDuration returns the lookback duration.
