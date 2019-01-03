@@ -79,7 +79,7 @@ func ConvertM3DBSeriesIterators(
 		return nil, err
 	}
 
-	if opts.IsSplittingSeriesByBlock() {
+	if opts.SplittingSeriesByBlock() {
 		return convertM3DBSegmentedBlockIterators(iterators, opts)
 	}
 
@@ -93,11 +93,11 @@ func convertM3DBSegmentedBlockIterators(
 ) ([]block.Block, error) {
 	defer iterators.Close()
 	// TODO bounds here should be bounds for this block only not for everything!
-	blockBuilder := newEncodedBlockBuilder(opts.GetTagOptions(), opts.GetConsolidationFunc())
+	blockBuilder := newEncodedBlockBuilder(opts.TagOptions(), opts.ConsolidationFunc())
 	var (
-		bounds    = opts.GetBounds()
-		iterAlloc = opts.GetIterAlloc()
-		pools     = opts.GetIteratorPools()
+		bounds    = opts.Bounds()
+		iterAlloc = opts.IterAlloc()
+		pools     = opts.IteratorPools()
 	)
 
 	for _, seriesIterator := range iterators.Iters() {

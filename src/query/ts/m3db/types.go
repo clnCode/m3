@@ -36,33 +36,33 @@ type Options interface {
 	// NB: if a lookback duration greater than 0 has been set, the series will
 	// always be treated as a single block.
 	SetSplitSeriesByBlock(bool) Options
-	// IsSplittingSeriesByBlock returns true iff lookback duration is 0, and the
+	// SplittingSeriesByBlock returns true iff lookback duration is 0, and the
 	// options has not been forced to return a single block.
-	IsSplittingSeriesByBlock() bool
+	SplittingSeriesByBlock() bool
 	// SetLookbackDuration sets the lookback duration.
 	SetLookbackDuration(time.Duration) Options
-	// GetLookbackDuration returns the lookback duration.
-	GetLookbackDuration() time.Duration
+	// LookbackDuration returns the lookback duration.
+	LookbackDuration() time.Duration
 	// SetLookbackDuration sets the consolidation function for the converter.
 	SetConsolidationFunc(consolidators.ConsolidationFunc) Options
-	// GetLookbackDuration returns the consolidation function.
-	GetConsolidationFunc() consolidators.ConsolidationFunc
+	// LookbackDuration returns the consolidation function.
+	ConsolidationFunc() consolidators.ConsolidationFunc
 	// SetLookbackDuration sets the tag options for the converter.
 	SetTagOptions(models.TagOptions) Options
-	// GetTagOptions returns the tag options.
-	GetTagOptions() models.TagOptions
+	// TagOptions returns the tag options.
+	TagOptions() models.TagOptions
 	// SetBounds sets the bounds for the encoded block.
 	SetBounds(models.Bounds) Options
-	// GetBounds returns the bounds for the encoded block.
-	GetBounds() models.Bounds
+	// Bounds returns the bounds for the encoded block.
+	Bounds() models.Bounds
 	// SetIterAlloc sets the iterator allocator.
 	SetIterAlloc(encoding.ReaderIteratorAllocate) Options
-	// GetIterAlloc returns the reader iterator allocator.
-	GetIterAlloc() encoding.ReaderIteratorAllocate
+	// IterAlloc returns the reader iterator allocator.
+	IterAlloc() encoding.ReaderIteratorAllocate
 	// SetIteratorPools sets the iterator pools for the converter.
 	SetIteratorPools(encoding.IteratorPools) Options
-	// GetIteratorPools returns the iterator pools for the converter.
-	GetIteratorPools() encoding.IteratorPools
+	// IteratorPools returns the iterator pools for the converter.
+	IteratorPools() encoding.IteratorPools
 
 	// Validate ensures that the given block options are valid.
 	Validate() error

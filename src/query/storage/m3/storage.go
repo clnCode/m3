@@ -96,7 +96,7 @@ func (s *m3storage) Fetch(
 		raw,
 		s.readWorkerPool,
 		false,
-		s.opts.GetTagOptions(),
+		s.opts.TagOptions(),
 	)
 }
 
@@ -222,7 +222,7 @@ func (s *m3storage) FetchTags(
 
 	metrics := make(models.Metrics, len(tagResult))
 	for i, result := range tagResult {
-		m, err := storage.FromM3IdentToMetric(result.ID, result.Iter, s.opts.GetTagOptions())
+		m, err := storage.FromM3IdentToMetric(result.ID, result.Iter, s.opts.TagOptions())
 		if err != nil {
 			return nil, err
 		}

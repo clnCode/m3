@@ -69,7 +69,7 @@ func (o *encodedBlockOptions) SetSplitSeriesByBlock(split bool) Options {
 	return &opts
 }
 
-func (o *encodedBlockOptions) IsSplittingSeriesByBlock() bool {
+func (o *encodedBlockOptions) SplittingSeriesByBlock() bool {
 	// If any lookback duration has been set, cannot split series by block.
 	if o.lookbackDuration > 0 {
 		return false
@@ -78,27 +78,28 @@ func (o *encodedBlockOptions) IsSplittingSeriesByBlock() bool {
 	return o.splitSeries
 }
 
-func (o *encodedBlockOptions) SetLookbackDuration(
-	lookback time.Duration,
-) Options {
+func (o *encodedBlockOptions) SetLookbackDuration(lookback time.Duration) Options {
+	// NB: lookback cannot be negative.
+	if lookback < 0 {
+		lookback = 0
+	}
+
 	opts := *o
 	opts.lookbackDuration = lookback
 	return &opts
 }
 
-func (o *encodedBlockOptions) GetLookbackDuration() time.Duration {
+func (o *encodedBlockOptions) LookbackDuration() time.Duration {
 	return o.lookbackDuration
 }
 
-func (o *encodedBlockOptions) SetConsolidationFunc(
-	fn consolidators.ConsolidationFunc,
-) Options {
+func (o *encodedBlockOptions) SetConsolidationFunc(fn consolidators.ConsolidationFunc) Options {
 	opts := *o
 	opts.consolidationFn = fn
 	return &opts
 }
 
-func (o *encodedBlockOptions) GetConsolidationFunc() consolidators.ConsolidationFunc {
+func (o *encodedBlockOptions) ConsolidationFunc() consolidators.ConsolidationFunc {
 	return o.consolidationFn
 }
 
@@ -108,7 +109,7 @@ func (o *encodedBlockOptions) SetTagOptions(tagOptions models.TagOptions) Option
 	return &opts
 }
 
-func (o *encodedBlockOptions) GetTagOptions() models.TagOptions {
+func (o *encodedBlockOptions) TagOptions() models.TagOptions {
 	return o.tagOptions
 }
 
@@ -118,7 +119,7 @@ func (o *encodedBlockOptions) SetBounds(b models.Bounds) Options {
 	return &opts
 }
 
-func (o *encodedBlockOptions) GetBounds() models.Bounds {
+func (o *encodedBlockOptions) Bounds() models.Bounds {
 	return *o.bounds
 }
 
@@ -128,7 +129,7 @@ func (o *encodedBlockOptions) SetIterAlloc(ia encoding.ReaderIteratorAllocate) O
 	return &opts
 }
 
-func (o *encodedBlockOptions) GetIterAlloc() encoding.ReaderIteratorAllocate {
+func (o *encodedBlockOptions) IterAlloc() encoding.ReaderIteratorAllocate {
 	return o.iterAlloc
 }
 
@@ -138,7 +139,7 @@ func (o *encodedBlockOptions) SetIteratorPools(p encoding.IteratorPools) Options
 	return &opts
 }
 
-func (o *encodedBlockOptions) GetIteratorPools() encoding.IteratorPools {
+func (o *encodedBlockOptions) IteratorPools() encoding.IteratorPools {
 	return o.pools
 }
 

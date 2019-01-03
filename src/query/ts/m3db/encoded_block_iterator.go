@@ -54,7 +54,7 @@ func NewEncodedBlock(
 	opts Options,
 	lastBlock bool,
 ) (block.Block, error) {
-	bounds := opts.GetBounds()
+	bounds := opts.Bounds()
 	consolidation := consolidationSettings{
 		consolidationFn: consolidators.TakeLast,
 		currentTime:     bounds.Start,
@@ -63,9 +63,9 @@ func NewEncodedBlock(
 
 	bl := newEncodedBlock(
 		seriesBlockIterators,
-		opts.GetTagOptions(),
+		opts.TagOptions(),
 		consolidation,
-		opts.GetLookbackDuration(),
+		opts.LookbackDuration(),
 		lastBlock,
 	)
 	err := bl.generateMetas()
